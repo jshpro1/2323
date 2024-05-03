@@ -29,12 +29,6 @@
             <c:if test="${!empty msg}">
             alert("${msg}");
             </c:if>
-            function confirmDelete(msgid) {
-                var result = confirm("메시지를 삭제하시겠습니까?");
-                if (result) {
-                    window.location.href = "deleteMessage.jsp?msgid=" + msgid;
-                }
-            }
         </script>
     </head>
     <body>
