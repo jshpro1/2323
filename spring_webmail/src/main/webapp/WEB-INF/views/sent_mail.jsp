@@ -1,6 +1,6 @@
 <%-- 
     Document   : sent_mail
-    Created on : 2024. 5. 15., 오후 11:52:45
+    Created on : 2024. 5. 16., 오후 11:55:45
     Author     : jsh
 --%>
 
@@ -23,7 +23,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>보낸 메일함</title>
+        <title>주메뉴 화면</title>
         <link type="text/css" rel="stylesheet" href="css/main_style.css" />
         <script>
             <c:if test="${!empty msg}">
@@ -40,7 +40,7 @@
 
         <!-- 메시지 삭제 링크를 누르면 바로 삭제되어 실수할 수 있음. 해결 방법은? -->
         <div id="main">
-            ${messageList}
+            ${sentmessageList}
         </div>
 
         <%@include file="footer.jspf"%>

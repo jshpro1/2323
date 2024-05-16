@@ -67,6 +67,11 @@ public class SystemController {
         return "/index";
     }
 
+    @RequestMapping(value = "/register", method = RequestMethod.GET)
+    public String showRegisterPage() {
+        return "register"; // register.jsp로 이동
+    }
+
     @RequestMapping(value = "/login.do", method = {RequestMethod.GET, RequestMethod.POST})
     public String loginDo(@RequestParam Integer menu) {
         String url = "";
@@ -138,6 +143,19 @@ public class SystemController {
         model.addAttribute("messageList", messageList);
         return "main_menu";
     }
+    /* 보낸메일함 컨트롤러*/
+    @GetMapping("/sent_mail")
+    public String sentmail(Model model) {
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
+
+        String sentmessageList = pop3.getsentMessageList();
+        model.addAttribute("sentmessageList", sentmessageList);
+       
+        return "sent_mail";
+    }
 
     @GetMapping("/admin_menu")
     public String adminMenu(Model model) {
@@ -178,6 +196,8 @@ public class SystemController {
         return "redirect:/admin_menu";
     }
 
+ 
+
     @GetMapping("/delete_user")
     public String deleteUser(Model model) {
         log.debug("delete_user called");
@@ -206,6 +226,29 @@ public class SystemController {
 
         return "redirect:/admin_menu";
     }
+    
+    @GetMapping("/change_user_password")
+    public String changeUser(Model model) {
+        log.debug("change_user called");
+        model.addAttribute("userList", getUserList());
+        return "admin/change_user_password";
+    }
+
+    @PostMapping("change_user_password.do")
+    public String changeUserpasswordDo(@RequestParam String[] selectedUsers,@RequestParam String newPassword, RedirectAttributes attrs) {
+        log.debug("change_user_password.do: selectedUser = {}", List.of(selectedUsers));
+
+        try {
+            String cwd = ctx.getRealPath(".");
+            UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
+                    ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
+            agent.changeUserpassword(selectedUsers,newPassword);  
+        } catch (Exception ex) {
+            log.error("change_user_password.do : 예외 = {}", ex);
+        }
+
+        return "redirect:/admin_menu";
+    }
 
     private List<String> getUserList() {
         String cwd = ctx.getRealPath(".");
@@ -226,9 +269,9 @@ public class SystemController {
 
     /**
      * https://34codefactory.wordpress.com/2019/06/16/how-to-display-image-in-jsp-using-spring-code-factory/
-     * 
+     *
      * @param imageName
-     * @return 
+     * @return
      */
     @RequestMapping(value = "/get_image/{imageName}")
     @ResponseBody
@@ -248,7 +291,7 @@ public class SystemController {
         byte[] imageInByte;
         try {
             byteArrayOutputStream = new ByteArrayOutputStream();
-            bufferedImage = ImageIO.read(new File(folderPath + File.separator + imageName) );
+            bufferedImage = ImageIO.read(new File(folderPath + File.separator + imageName));
             String format = imageName.substring(imageName.lastIndexOf(".") + 1);
             ImageIO.write(bufferedImage, format, byteArrayOutputStream);
             byteArrayOutputStream.flush();

@@ -4,6 +4,7 @@
  */
 package deu.cse.spring_webmail.model;
 
+import static ch.qos.logback.core.testUtil.MockInitialContextFactory.initialize;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,15 +12,12 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 
 /**
  *
- * @author jsh
+ * @author jongmin
  */
 @Slf4j
-@Component
 public class UserAdminAgent {
 
     private String server;
@@ -34,9 +32,6 @@ public class UserAdminAgent {
     // private final String EOL = "\n";
     private final String EOL = "\r\n";
     private String cwd;
-
-    public UserAdminAgent() {
-    }
 
     public UserAdminAgent(String server, int port, String cwd,
             String root_id, String root_pass, String admin_id) {
@@ -111,7 +106,6 @@ public class UserAdminAgent {
         }
     }  // addUser()
 
-    @Bean
     public List<String> getUserList() {
         List<String> userList = new LinkedList<String>();
         byte[] messageBuffer = new byte[1024];
@@ -142,7 +136,7 @@ public class UserAdminAgent {
         } finally {
             return userList;
         }
-    }  
+    }  // getUserList()
 
     private List<String> parseUserList(String message) {
         List<String> userList = new LinkedList<String>();
@@ -302,4 +296,44 @@ public class UserAdminAgent {
             return status;
         }
     }
+        public boolean changeUserpassword(String[] userList, String newPassword) {
+        boolean status = false;
+        byte[] messageBuffer = new byte[1024];
+
+        log.debug("changePassword() called");
+        if (!isConnected) {
+            return status;
+        }
+
+        try {
+            for (String userId : userList) {
+                // 1: "setpassword" command
+                String setPasswordCommand = "setpassword " + userId + " " + newPassword + EOL;
+                os.write(setPasswordCommand.getBytes());
+
+                // 2: response for "setpassword" command
+                java.util.Arrays.fill(messageBuffer, (byte) 0);
+                is.read(messageBuffer);
+                String recvMessage = new String(messageBuffer);
+                log.debug(recvMessage);
+
+                // 3: Check if password is changed successfully
+                if (recvMessage.contains("password changed")) {
+                    status = true;
+                } else {
+                    status = false;
+                }
+            }
+            // 4: Close connection
+            quit();
+            System.out.flush();  // for test
+            socket.close();
+        } catch (Exception ex) {
+            log.error("changePassword 예외: {}", ex.getMessage());
+            status = false;
+        } finally {
+            // 5: Return status
+            return status;
+        }
+    }  // changePassword()
 }
