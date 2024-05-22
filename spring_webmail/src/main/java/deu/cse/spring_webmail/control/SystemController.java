@@ -58,6 +58,8 @@ public class SystemController {
     @Value("${james.host}")
     private String JAMES_HOST;
 
+
+    
     @GetMapping("/")
     public String index() {
         log.debug("index() called...");
@@ -143,19 +145,7 @@ public class SystemController {
         model.addAttribute("messageList", messageList);
         return "main_menu";
     }
-    /* 보낸메일함 컨트롤러*/
-    @GetMapping("/sent_mail")
-    public String sentmail(Model model) {
-        Pop3Agent pop3 = new Pop3Agent();
-        pop3.setHost((String) session.getAttribute("host"));
-        pop3.setUserid((String) session.getAttribute("userid"));
-        pop3.setPassword((String) session.getAttribute("password"));
 
-        String sentmessageList = pop3.getsentMessageList();
-        model.addAttribute("sentmessageList", sentmessageList);
-       
-        return "sent_mail";
-    }
 
     @GetMapping("/admin_menu")
     public String adminMenu(Model model) {

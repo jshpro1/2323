@@ -18,14 +18,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class MessageFormatter {
-    @NonNull private String userid;  // 파일 임시 저장 디렉토리 생성에 필요
-    private HttpServletRequest request = null;
-    
-    // 220612 LJM - added to implement REPLY
-    @Getter private String sender;
-    @Getter private String subject;
-    @Getter private String body;
 
+    @NonNull
+    private String userid;  // 파일 임시 저장 디렉토리 생성에 필요
+    private HttpServletRequest request = null;
+
+    // 220612 LJM - added to implement REPLY
+    @Getter
+    private String sender;
+    @Getter
+    private String Recipient;
+    @Getter
+    private String subject;
+    @Getter
+    private String body;
 
     public String getMessageTable(Message[] messages) {
         StringBuilder buffer = new StringBuilder();
@@ -60,43 +66,7 @@ public class MessageFormatter {
         buffer.append("</table>");
 
         return buffer.toString();
-//        return "MessageFormatter 테이블 결과";
-    }
-    // 보낸메일함 getsentMessageTable
-    public String getsentMessageTable(Message[] messages) {
-        StringBuilder buffer = new StringBuilder();
 
-        // 메시지 제목 보여주기
-        buffer.append("<table>");  // table start
-        buffer.append("<tr> "
-                + " <th> No. </td> "
-                + " <th> 보낸 사람1 </td>"
-                + " <th> 제목 </td>     "
-                + " <th> 보낸 날짜 </td>   "
-                + " <th> 삭제 </td>   "
-                + " </tr>");
-
-        for (int i = messages.length - 1; i >= 0; i--) {
-            MessageParser parser = new MessageParser(messages[i], userid);
-            parser.parse(false);  // envelope 정보만 필요
-            // 메시지 헤더 포맷
-            // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
-            buffer.append("<tr> "
-                    + " <td id=no>" + (i + 1) + " </td> "
-                    + " <td id=sender>" + parser.getToAddress() + "</td>"
-                    + " <td id=subject> "
-                    + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
-                    + parser.getSubject() + "</a> </td>"
-                    + " <td id=date>" + parser.getSentDate() + "</td>"
-                    + " <td id=delete>"
-                    + "<a href=delete_mail.do"
-                    + "?msgid=" + (i + 1) + "> 삭제 </a>" + "</td>"
-                    + " </tr>");
-        }
-        buffer.append("</table>");
-
-        return buffer.toString();
-//        return "MessageFormatter 테이블 결과";
     }
 
     public String getMessage(Message message) {
@@ -105,7 +75,7 @@ public class MessageFormatter {
         // MessageParser parser = new MessageParser(message, userid);
         MessageParser parser = new MessageParser(message, userid, request);
         parser.parse(true);
-        
+
         sender = parser.getFromAddress();
         subject = parser.getSubject();
         body = parser.getBody();
